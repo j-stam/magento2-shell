@@ -1,7 +1,7 @@
 {
     "name": "j-stam/magento2-shell",
     "description": "Adds magento 1 shell like functionallity",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "magento2-module",
     "authors": [
         {

@@ -73,14 +73,15 @@ abstract class ShellAbstract
     }
 
     /**
-     * Get Magento Root path (with last directory separator)
+     * Get Magento Root path
      *
      * @return string
      */
     protected function getRootPath()
     {
         if (is_null($this->rootPath)) {
-            $this->rootPath = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
+            $directory = $this->getInstance(\Magento\Framework\Filesystem\DirectoryList::class);
+            $this->rootPath = $directory->getRoot();
         }
 
         return $this->rootPath;
