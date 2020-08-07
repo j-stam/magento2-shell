@@ -26,7 +26,17 @@ The area code defaults to global. To set your desired code overwrite the `protec
 $this->io->writeJson($data, 'filename.json')
 ```
 
-### Read data to csv, xml, json
+### Read data from csv, xml, json
 ```php 
 $this->io->readJson('filename.json')
+```
+
+### Excecute sql querys
+You can run sql queries with the standard `\Magento\Framework\DB\Adapter\AdapterInterface`
+```php
+$sql = 'SELECT * FROM your_table LIMIT 1';
+$result = $this->connection->fetchAll($sql);
+// or
+$query = $this->connection->query('SELECT * FROM your_table LIMIT 1');
+$result = $query->fetchAll();
 ```
