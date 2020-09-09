@@ -9,7 +9,7 @@ Install the package
 composer require j-stam/magento2-shell:*
 ```
 
-Copy the shell folder from this package to youre magento 2 root
+Copy the shell folder from this package to your magento 2 root
 
 ## Usage
 
@@ -40,3 +40,15 @@ $result = $this->connection->fetchAll($sql);
 $query = $this->connection->query('SELECT * FROM your_table LIMIT 1');
 $result = $query->fetchAll();
 ```
+
+### Write output to a log file
+You can write output to a log file using monologger. To set your log file name overwrite the `protected $logFileName`.
+When this variable is not set, your class name will be converted from PascalCase to lowercase seperated with dashes.
+
+To write output to your log use the `protected $logger`
+```php
+$this->logger->error('Your error message');
+$this->logger->info('Your info message');
+...
+```
+All log files are placed in `{magento_root}/var/log/shell/` by default. To specify your own log file path overwrite the `protected $logFilePath` variable. 

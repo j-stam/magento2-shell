@@ -47,6 +47,21 @@ abstract class ShellAbstract
     protected $connection;
 
     /**
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
+     * @var string
+     */
+    protected $logFileName;
+
+    /**
+     * @var string
+     */
+    protected $logFilePath = '/var/log/shell/';
+
+    /**
      * Initialize application and parse input parameters
      *
      */
@@ -70,6 +85,23 @@ abstract class ShellAbstract
             'xmlGenerator' => $this->createInstance(\Magento\Framework\Xml\Generator::class),
             'jsonSerializer' => $this->createInstance(\Magento\Framework\Serialize\Serializer\Json::class),
         ]);
+
+        if (!isset($this->logFileName)) {
+            $this->logFileName = ltrim(
+                    strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '-$0', get_class($this))),
+                    '-'
+                ) . '.log';
+        }
+        $this->logger = $this->createInstance(Logger::class, [
+            'name' => get_class($this),
+            'handlers' => [
+                'system' => $this->createInstance(Logger\Handler::class, [
+                    'filesystem' => $this->createInstance(\Magento\Framework\Filesystem\Driver\File::class),
+                    'filePath' => BP . $this->logFilePath,
+                    'fileName' => $this->logFileName,
+                ]),
+            ],
+        ]);
     }
 
     /**
@@ -90,7 +122,7 @@ abstract class ShellAbstract
     /**
      * Set magento app code
      *
-     * @param null $code
+     * @param  null  $code
      * @return $this
      */
     protected function setAppAreaCode($code = null)
@@ -190,7 +222,7 @@ USAGE;
      * Retrieve argument value by name or false
      *
      * @param $name
-     * @param bool $default
+     * @param  bool  $default
      * @return bool|mixed
      */
     public function getArg($name, $default = false)
@@ -213,7 +245,7 @@ USAGE;
     /**
      * Retrieve cached object instance
      *
-     * @param string $type
+     * @param  string  $type
      * @return mixed
      */
     public function getInstance($type)
@@ -224,8 +256,8 @@ USAGE;
     /**
      * Create new object instance
      *
-     * @param string $type
-     * @param array $arguments
+     * @param  string  $type
+     * @param  array  $arguments
      * @return mixed
      */
     public function createInstance($type, array $arguments = [])
@@ -251,7 +283,7 @@ USAGE;
 
     /**
      * @param $message
-     * @param bool $newLine
+     * @param  bool  $newLine
      * @return $this
      */
     public function write($message, $newLine = true)
