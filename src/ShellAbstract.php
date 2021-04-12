@@ -73,10 +73,27 @@ abstract class ShellAbstract
         $this->setAppAreaCode();
 
         $this->_parseArgs();
-        $this->_construct();
         $this->_validate();
         $this->_showHelp();
 
+        $this->initialize();
+
+        if (method_exists($this, '_construct')) {
+            $reflection = new \ReflectionMethod($this, '_construct');
+            $params = $reflection->getParameters();
+            $arguments = [];
+            foreach ($params as $param) {
+                if (!class_exists($param->getType()->getName())) {
+                    throw new \RuntimeException(sprintf('Class "%s" not found', $param->getType()->getName()));
+                }
+                $arguments[] = $this->createInstance($param->getType()->getName());
+            }
+            call_user_func_array([$this, '_construct'], $arguments);
+        }
+    }
+
+    protected function initialize()
+    {
         $this->connection = $this->getInstance(\Magento\Framework\App\ResourceConnection::class)->getConnection();
 
         $this->io = $this->createInstance(IO::class, [
@@ -87,11 +104,9 @@ abstract class ShellAbstract
         ]);
 
         if (!isset($this->logFileName)) {
-            $this->logFileName = ltrim(
-                    strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '-$0', get_class($this))),
-                    '-'
-                ) . '.log';
+            $this->logFileName = $this->convertPascalCaseToSnakeCase(get_class($this)) . '.log';
         }
+
         $this->logger = $this->createInstance(Logger::class, [
             'name' => get_class($this),
             'handlers' => [
@@ -122,7 +137,7 @@ abstract class ShellAbstract
     /**
      * Set magento app code
      *
-     * @param  null  $code
+     * @param null $code
      * @return $this
      */
     protected function setAppAreaCode($code = null)
@@ -163,16 +178,6 @@ abstract class ShellAbstract
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Additional initialize instruction
-     *
-     * @return $this
-     */
-    protected function _construct()
-    {
         return $this;
     }
 
@@ -222,7 +227,7 @@ USAGE;
      * Retrieve argument value by name or false
      *
      * @param $name
-     * @param  bool  $default
+     * @param bool $default
      * @return bool|mixed
      */
     public function getArg($name, $default = false)
@@ -245,7 +250,7 @@ USAGE;
     /**
      * Retrieve cached object instance
      *
-     * @param  string  $type
+     * @param string $type
      * @return mixed
      */
     public function getInstance($type)
@@ -256,8 +261,8 @@ USAGE;
     /**
      * Create new object instance
      *
-     * @param  string  $type
-     * @param  array  $arguments
+     * @param string $type
+     * @param array $arguments
      * @return mixed
      */
     public function createInstance($type, array $arguments = [])
@@ -283,7 +288,7 @@ USAGE;
 
     /**
      * @param $message
-     * @param  bool  $newLine
+     * @param bool $newLine
      * @return $this
      */
     public function write($message, $newLine = true)
@@ -295,5 +300,17 @@ USAGE;
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $pascalString
+     * @return string
+     */
+    protected function convertPascalCaseToSnakeCase($pascalString)
+    {
+        return ltrim(
+            strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '-$0', $pascalString)),
+            '-'
+        );
     }
 }
