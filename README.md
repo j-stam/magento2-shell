@@ -65,7 +65,7 @@ All log files are placed in `{magento_root}/var/log/shell/` by default. To speci
 ### Write output to terminal
 Included in the shell is the [symfony console output class](https://symfony.com/doc/current/console.html#console-output).
 This can be used directly by accessing the `protected $consoleOutput`. if you just want to write (a line) you can use the
-public functions `write($messages, $newLine = true, $options = OutputInterface::OUTPUT_NORMAL)` and `writeln(writeln($message, $options = OutputInterface::OUTPUT_NORMAL))`
+public functions `write($messages, $newLine = true, $options = OutputInterface::OUTPUT_NORMAL)` and `writeln($message, $options = OutputInterface::OUTPUT_NORMAL)`
 ```php
 $this->writeln('Your line');
 $this->write('Your message')
