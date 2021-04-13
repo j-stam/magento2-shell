@@ -2,9 +2,20 @@
 
 namespace Stam\Shell;
 
+use Magento\Framework\App\Area;
 use Magento\Framework\App\Bootstrap;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\State;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\File\Csv as CsvProcessor;
+use Magento\Framework\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem\Driver\File as FileDriver;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
+use Magento\Framework\Xml\Generator as XmlGenerator;
+use Magento\Framework\Xml\Parser as XmlParser;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class ShellAbstract
 {
@@ -62,6 +73,11 @@ abstract class ShellAbstract
     protected $logFilePath = '/var/log/shell/';
 
     /**
+     * @var ConsoleOutput
+     */
+    protected $consoleOutput;
+
+    /**
      * Initialize application and parse input parameters
      *
      */
@@ -92,15 +108,18 @@ abstract class ShellAbstract
         }
     }
 
+    /**
+     * Initialize shell objects
+     */
     protected function initialize()
     {
-        $this->connection = $this->getInstance(\Magento\Framework\App\ResourceConnection::class)->getConnection();
+        $this->connection = $this->getInstance(ResourceConnection::class)->getConnection();
 
         $this->io = $this->createInstance(IO::class, [
-            'csvProcessor' => $this->createInstance(\Magento\Framework\File\Csv::class),
-            'xmlParser' => $this->createInstance(\Magento\Framework\Xml\Parser::class),
-            'xmlGenerator' => $this->createInstance(\Magento\Framework\Xml\Generator::class),
-            'jsonSerializer' => $this->createInstance(\Magento\Framework\Serialize\Serializer\Json::class),
+            'csvProcessor' => $this->createInstance(CsvProcessor::class),
+            'xmlParser' => $this->createInstance(XmlParser::class),
+            'xmlGenerator' => $this->createInstance(XmlGenerator::class),
+            'jsonSerializer' => $this->createInstance(JsonSerializer::class),
         ]);
 
         if (!isset($this->logFileName)) {
@@ -111,12 +130,14 @@ abstract class ShellAbstract
             'name' => get_class($this),
             'handlers' => [
                 'system' => $this->createInstance(Logger\Handler::class, [
-                    'filesystem' => $this->createInstance(\Magento\Framework\Filesystem\Driver\File::class),
+                    'filesystem' => $this->createInstance(FileDriver::class),
                     'filePath' => BP . $this->logFilePath,
                     'fileName' => $this->logFileName,
                 ]),
             ],
         ]);
+
+        $this->consoleOutput = new ConsoleOutput();
     }
 
     /**
@@ -127,7 +148,7 @@ abstract class ShellAbstract
     protected function getRootPath()
     {
         if (is_null($this->rootPath)) {
-            $directory = $this->getInstance(\Magento\Framework\Filesystem\DirectoryList::class);
+            $directory = $this->getInstance(DirectoryList::class);
             $this->rootPath = $directory->getRoot();
         }
 
@@ -147,10 +168,10 @@ abstract class ShellAbstract
         }
 
         if (is_null($this->appAreaCode)) {
-            $this->appAreaCode = \Magento\Framework\App\Area::AREA_GLOBAL;
+            $this->appAreaCode = Area::AREA_GLOBAL;
         }
 
-        $appState = $this->getInstance(\Magento\Framework\App\State::class);
+        $appState = $this->getInstance(State::class);
         $appState->setAreaCode($this->appAreaCode);
 
         return $this;
@@ -280,26 +301,21 @@ USAGE;
 
     /**
      * @param $message
+     * @param int $options
      */
-    public function writeln($message)
+    public function writeln($message, $options = OutputInterface::OUTPUT_NORMAL)
     {
-        $this->write($message, true);
+        $this->consoleOutput->writeln($message, true, $options);
     }
 
     /**
-     * @param $message
+     * @param $messages
      * @param bool $newLine
-     * @return $this
+     * @param int $options
      */
-    public function write($message, $newLine = true)
+    public function write($messages, $newLine = true, $options = OutputInterface::OUTPUT_NORMAL)
     {
-        echo $message;
-
-        if ($newLine) {
-            echo PHP_EOL;
-        }
-
-        return $this;
+        $this->consoleOutput->write($messages, $newLine, $options);
     }
 
     /**
