@@ -23,7 +23,7 @@ The area code defaults to global. To set your desired code overwrite the `protec
 
 **Use dependency injection.**
 ```php
- protected function _construct(
+protected function _construct(
     \Magento\Catalog\Model\Product $product
 ) {
     $this->product = $product;
