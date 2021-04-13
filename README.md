@@ -21,6 +21,15 @@ The area code defaults to global. To set your desired code overwrite the `protec
 * Get a instance: `public function getInstance($type)`
 * Get the object manager: `public function getObjectManager()`
 
+*Use dependency injection.*
+```php
+ protected function _construct(
+    \Magento\Catalog\Model\Product $product
+) {
+    $this->product = $product;
+}
+```
+
 ### Export data to csv, xml, json
 ```php 
 $this->io->writeJson($data, 'filename.json')
@@ -52,3 +61,12 @@ $this->logger->info('Your info message');
 ...
 ```
 All log files are placed in `{magento_root}/var/log/shell/` by default. To specify your own log file path overwrite the `protected $logFilePath` variable. 
+
+### Write output to terminal
+Included in the shell is the [symfony console output class](https://symfony.com/doc/current/console.html#console-output).
+This can be used directly by accessing the `protected $consoleOutput`. if you just want to write (a line) you can use the
+public functions `write($messages, $newLine = true, $options = OutputInterface::OUTPUT_NORMAL)` and `writeln(writeln($message, $options = OutputInterface::OUTPUT_NORMAL))`
+```php
+$this->writeln('Your line');
+$this->write('Your message')
+$this->write(['Your message', 'Your other message'])
