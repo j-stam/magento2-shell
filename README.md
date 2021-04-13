@@ -21,7 +21,7 @@ The area code defaults to global. To set your desired code overwrite the `protec
 * Get a instance: `public function getInstance($type)`
 * Get the object manager: `public function getObjectManager()`
 
-*Use dependency injection.*
+**Use dependency injection.**
 ```php
  protected function _construct(
     \Magento\Catalog\Model\Product $product
