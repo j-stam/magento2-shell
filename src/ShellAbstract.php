@@ -104,7 +104,7 @@ abstract class ShellAbstract
         ]);
 
         if (!isset($this->logFileName)) {
-            $this->logFileName = $this->convertPascalCaseToSnakeCase(get_class($this)) . '.log';
+            $this->logFileName = $this->convertPascalCaseToLogFileName(get_class($this)) . '.log';
         }
 
         $this->logger = $this->createInstance(Logger::class, [
@@ -306,7 +306,7 @@ USAGE;
      * @param string $pascalString
      * @return string
      */
-    protected function convertPascalCaseToSnakeCase($pascalString)
+    protected function convertPascalCaseToLogFileName($pascalString)
     {
         return ltrim(
             strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '-$0', $pascalString)),
