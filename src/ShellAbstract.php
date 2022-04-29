@@ -92,20 +92,30 @@ abstract class ShellAbstract
         $this->_validate();
         $this->_showHelp();
 
+        $this->_construct();
+
         $this->initialize();
 
-        if (method_exists($this, '_construct')) {
-            $reflection = new \ReflectionMethod($this, '_construct');
+        if (method_exists($this, 'di')) {
+            $reflection = new \ReflectionMethod($this, 'di');
             $params = $reflection->getParameters();
             $arguments = [];
             foreach ($params as $param) {
                 if (!class_exists($param->getType()->getName())) {
                     throw new \RuntimeException(sprintf('Class "%s" not found', $param->getType()->getName()));
                 }
-                $arguments[] = $this->createInstance($param->getType()->getName());
+                $arguments[] = $this->getInstance($param->getType()->getName());
             }
-            call_user_func_array([$this, '_construct'], $arguments);
+            call_user_func_array([$this, 'di'], $arguments);
         }
+    }
+
+    /**
+     * @return $this
+     */
+    protected function _construct()
+    {
+        return $this;
     }
 
     /**
@@ -156,7 +166,7 @@ abstract class ShellAbstract
     }
 
     /**
-     * Set magento app code
+     * Set Magento app code
      *
      * @param null $code
      * @return $this
@@ -173,6 +183,20 @@ abstract class ShellAbstract
 
         $appState = $this->getInstance(State::class);
         $appState->setAreaCode($this->appAreaCode);
+
+        return $this;
+    }
+
+    /**
+     * Set secure area
+     * 
+     * @param $isSecure
+     * @return $this
+     */
+    protected function setIsSecureArea($isSecure)
+    {
+        $registry = $this->getInstance(\Magento\Framework\Registry::class);
+        $registry->register('isSecureArea', $isSecure);
 
         return $this;
     }
@@ -214,12 +238,6 @@ abstract class ShellAbstract
     }
 
     /**
-     * Run script
-     *
-     */
-    abstract public function run();
-
-    /**
      * Check is show usage help
      *
      */
@@ -229,6 +247,21 @@ abstract class ShellAbstract
             die($this->usageHelp());
         }
     }
+
+    /**
+     * @param string $pascalString
+     * @return string
+     */
+    protected function convertPascalCaseToLogFileName($pascalString)
+    {
+        return ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '-$0', $pascalString)), '-');
+    }
+
+    /**
+     * Run script
+     *
+     */
+    abstract public function run();
 
     /**
      * Retrieve Usage Help Message
@@ -271,8 +304,9 @@ USAGE;
     /**
      * Retrieve cached object instance
      *
-     * @param string $type
-     * @return mixed
+     * @template T
+     * @param T $type
+     * @return T
      */
     public function getInstance($type)
     {
@@ -282,9 +316,10 @@ USAGE;
     /**
      * Create new object instance
      *
-     * @param string $type
+     * @template T
+     * @param T $type
      * @param array $arguments
-     * @return mixed
+     * @return T
      */
     public function createInstance($type, array $arguments = [])
     {
@@ -316,17 +351,5 @@ USAGE;
     public function write($messages, $newLine = true, $options = OutputInterface::OUTPUT_NORMAL)
     {
         $this->consoleOutput->write($messages, $newLine, $options);
-    }
-
-    /**
-     * @param string $pascalString
-     * @return string
-     */
-    protected function convertPascalCaseToLogFileName($pascalString)
-    {
-        return ltrim(
-            strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '-$0', $pascalString)),
-            '-'
-        );
     }
 }

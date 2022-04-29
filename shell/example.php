@@ -4,11 +4,12 @@ require_once realpath(dirname(__FILE__) . '/../app/bootstrap.php');
 
 class Example extends \Stam\Shell\ShellAbstract
 {
-
     protected $product;
 
-    // optional
-    protected function _construct(
+    /**
+     * Optional function, can be used for dependency injection
+     */
+    protected function di(
         \Magento\Catalog\Model\Product $product
     ) {
         $this->product = $product;
@@ -16,7 +17,8 @@ class Example extends \Stam\Shell\ShellAbstract
 
     public function run()
     {
-        // ...
+        $this->writeln('Hello world!');
+        $this->logger->debug('Hello world!');
     }
 }
 $shell = new Example();

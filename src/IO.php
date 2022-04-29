@@ -2,40 +2,49 @@
 
 namespace Stam\Shell;
 
+use Magento\Framework\File\Csv as CsvProcessor;
+use Magento\Framework\Xml\Parser as XmlParser;
+use Magento\Framework\Xml\Generator as XmlGenerator;
+use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
+use Magento\Framework\Exception\FileSystemException;
+use DOMException;
+use Exception;
+
 class IO
 {
     /**
-     * @var \Magento\Framework\File\Csv
+     * @var CsvProcessor
      */
     protected $csvProcessor;
 
     /**
-     * @var \Magento\Framework\Xml\Parser
+     * @var XmlParser
      */
     protected $xmlParser;
 
     /**
-     * @var \Magento\Framework\Xml\Generator
+     * @var XmlGenerator
      */
     protected $xmlGenerator;
 
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var JsonSerializer
      */
     protected $jsonSerializer;
 
     /**
      * IO constructor.
-     * @param \Magento\Framework\File\Csv $csvProcessor
-     * @param \Magento\Framework\Xml\Parser $xmlParser
-     * @param \Magento\Framework\Xml\Generator $xmlGenerator
-     * @param \Magento\Framework\Serialize\Serializer\Json $jsonSerializer
+     *
+     * @param CsvProcessor $csvProcessor
+     * @param XmlParser $xmlParser
+     * @param XmlGenerator $xmlGenerator
+     * @param JsonSerializer $jsonSerializer
      */
     public function __construct(
-        \Magento\Framework\File\Csv $csvProcessor,
-        \Magento\Framework\Xml\Parser $xmlParser,
-        \Magento\Framework\Xml\Generator $xmlGenerator,
-        \Magento\Framework\Serialize\Serializer\Json $jsonSerializer
+        CsvProcessor $csvProcessor,
+        XmlParser $xmlParser,
+        XmlGenerator $xmlGenerator,
+        JsonSerializer $jsonSerializer
     ) {
         $this->csvProcessor = $csvProcessor;
         $this->xmlParser = $xmlParser;
@@ -49,7 +58,7 @@ class IO
      * @param string $delimiter
      * @param string $enclosure
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function readCsv($file, $lineLength = 0, $delimiter = ',', $enclosure = '"')
     {
@@ -66,7 +75,7 @@ class IO
      * @param string $delimiter
      * @param string $enclosure
      * @return $this
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws FileSystemException
      */
     public function writeCsv(array $data, $file, $delimiter = ',', $enclosure = '"')
     {
@@ -93,7 +102,7 @@ class IO
      * @param array $data
      * @param $file
      * @return $this
-     * @throws \DOMException
+     * @throws DOMException
      */
     public function writeXml(array $data, $file)
     {
