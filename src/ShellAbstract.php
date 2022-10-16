@@ -7,13 +7,17 @@ use Magento\Framework\App\Bootstrap;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\State;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv as CsvProcessor;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Driver\File as FileDriver;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Registry;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\Framework\Xml\Generator as XmlGenerator;
 use Magento\Framework\Xml\Parser as XmlParser;
+use ReflectionMethod;
+use RuntimeException;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -97,12 +101,12 @@ abstract class ShellAbstract
         $this->initialize();
 
         if (method_exists($this, 'di')) {
-            $reflection = new \ReflectionMethod($this, 'di');
+            $reflection = new ReflectionMethod($this, 'di');
             $params = $reflection->getParameters();
             $arguments = [];
             foreach ($params as $param) {
                 if (!class_exists($param->getType()->getName())) {
-                    throw new \RuntimeException(sprintf('Class "%s" not found', $param->getType()->getName()));
+                    throw new RuntimeException(sprintf('Class "%s" not found', $param->getType()->getName()));
                 }
                 $arguments[] = $this->getInstance($param->getType()->getName());
             }
@@ -111,15 +115,17 @@ abstract class ShellAbstract
     }
 
     /**
-     * @return $this
+     * @return void
      */
     protected function _construct()
     {
-        return $this;
+        //
     }
 
     /**
      * Initialize shell objects
+     *
+     * @return void
      */
     protected function initialize()
     {
@@ -168,8 +174,9 @@ abstract class ShellAbstract
     /**
      * Set Magento app code
      *
-     * @param null $code
+     * @param string|null $code
      * @return $this
+     * @throws LocalizedException
      */
     protected function setAppAreaCode($code = null)
     {
@@ -189,13 +196,13 @@ abstract class ShellAbstract
 
     /**
      * Set secure area
-     * 
-     * @param $isSecure
+     *
+     * @param bool $isSecure
      * @return $this
      */
     protected function setIsSecureArea($isSecure)
     {
-        $registry = $this->getInstance(\Magento\Framework\Registry::class);
+        $registry = $this->getInstance(Registry::class);
         $registry->register('isSecureArea', $isSecure);
 
         return $this;

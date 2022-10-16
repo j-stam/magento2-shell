@@ -2,13 +2,13 @@
 
 namespace Stam\Shell;
 
-use Magento\Framework\File\Csv as CsvProcessor;
-use Magento\Framework\Xml\Parser as XmlParser;
-use Magento\Framework\Xml\Generator as XmlGenerator;
-use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
-use Magento\Framework\Exception\FileSystemException;
 use DOMException;
 use Exception;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\File\Csv as CsvProcessor;
+use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
+use Magento\Framework\Xml\Generator as XmlGenerator;
+use Magento\Framework\Xml\Parser as XmlParser;
 
 class IO
 {
