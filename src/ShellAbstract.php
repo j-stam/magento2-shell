@@ -105,8 +105,8 @@ abstract class ShellAbstract
             $params = $reflection->getParameters();
             $arguments = [];
             foreach ($params as $param) {
-                if (!class_exists($param->getType()->getName())) {
-                    throw new RuntimeException(sprintf('Class "%s" not found', $param->getType()->getName()));
+                if (!class_exists($param->getType()->getName()) && !interface_exists($param->getType()->getName())) {
+                    throw new RuntimeException(sprintf('Dependency "%s" not found', $param->getType()->getName()));
                 }
                 $arguments[] = $this->getInstance($param->getType()->getName());
             }
